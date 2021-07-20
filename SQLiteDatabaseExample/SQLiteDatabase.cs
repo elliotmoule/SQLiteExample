@@ -82,7 +82,9 @@ namespace SQLiteDatabaseExample
             return !Exists(databaseName);   // Checks whether the database still exists. If it does, this will return false.
         }
 
-        public bool Initialize(string databaseName)
+        public static bool Delete(SQLiteDatabase database) => Delete(database.ToString());
+
+        public static bool Initialize(string databaseName)
         {
             // Check whether the database already exists.
             if (Exists(databaseName))
@@ -119,7 +121,7 @@ namespace SQLiteDatabaseExample
         /// </summary>
         /// <param name="databaseName">The name of the database which the tables should be added to.</param>
         /// <returns>Returns true if tables were successfully added.</returns>
-        public bool CreateTables(string databaseName)
+        private static bool CreateTables(string databaseName)
         {
             if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
             if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided");
@@ -181,6 +183,8 @@ namespace SQLiteDatabaseExample
             return File.Exists(GetDatabasePath(databaseName));
         }
 
+        public static bool Exists(SQLiteDatabase database) => Exists(database.ToString());
+
         /// <summary>
         /// Provides the file path for where a database should be stored.
         /// </summary>
@@ -210,7 +214,7 @@ namespace SQLiteDatabaseExample
         /// </summary>
         /// <param name="databaseName">The name of the database to retrieve the names from.</param>
         /// <returns>Returns a list of strings, of the names of the tables found within the database.</returns>
-        public List<string> GetExistingTables(string databaseName)
+        public static List<string> GetExistingTables(string databaseName)
         {
             List<string> tables = null;
 
@@ -233,6 +237,11 @@ namespace SQLiteDatabaseExample
             }
 
             return tables;
+        }
+
+        public override string ToString()
+        {
+            return DatabaseName;
         }
     }
 }

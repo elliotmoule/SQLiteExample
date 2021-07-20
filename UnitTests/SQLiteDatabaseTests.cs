@@ -49,8 +49,6 @@ namespace UnitTests
             // SETUP
             Assert.IsTrue(SQLiteDatabase.Create("Test_2"));
 
-            Assert.ThrowsException<ArgumentNullException>(() => SQLiteDatabase.Exists(null));
-
             Assert.IsTrue(SQLiteDatabase.Exists("Test_2"));
 
             Assert.IsFalse(SQLiteDatabase.Exists("NotADatabaseToTest"));
@@ -102,12 +100,12 @@ namespace UnitTests
         public void GetExistingTables()
         {
             // SETUP
-            Assert.IsTrue(SQLiteDatabase.Create("Test_5"));
-            Assert.IsTrue(_database.CreateTables("Test_5"));
+            var testDb5 = new SQLiteDatabase("Test_5");
+            Assert.IsNotNull(testDb5);
 
-            Assert.ThrowsException<ArgumentException>(() => _database.GetExistingTables("ADatabaseThatDoesNotExist"));
+            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetExistingTables("ADatabaseThatDoesNotExist"));
 
-            var tables = _database.GetExistingTables("Test_5");
+            var tables = SQLiteDatabase.GetExistingTables("Test_5");
             Assert.IsNotNull(tables);
             Assert.AreEqual(2, tables.Count);
             Assert.IsTrue(tables.Contains("Profile"));
@@ -128,23 +126,6 @@ namespace UnitTests
             Assert.IsFalse(SQLiteDatabase.Create("Test_6"));    // Shouldn't be able to create an existing database.
 
             Assert.IsTrue(SQLiteDatabase.Delete("Test_6"));
-        }
-
-        [TestMethod]
-        public void CreateTables()
-        {
-            // SETUP
-            Assert.IsTrue(SQLiteDatabase.Create("Test_7"));
-
-            Assert.ThrowsException<ArgumentNullException>(() => _database.CreateTables(null));
-            Assert.ThrowsException<ArgumentException>(() => _database.CreateTables(""));
-            Assert.ThrowsException<ArgumentException>(() => _database.CreateTables("   "));
-
-            Assert.IsFalse(_database.CreateTables("ADatabaseThatDoesNotExist"));
-            Assert.IsTrue(_database.CreateTables("Test_7"));
-
-            // TEAR DOWN
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_7"));
         }
 
         [TestMethod]
@@ -188,8 +169,8 @@ namespace UnitTests
         [TestMethod]
         public void InitialiseDatabase()
         {
-            Assert.IsTrue(_database.Initialize("Test_0"));  // Will initialise the database created in the CTOR.
-            Assert.IsTrue(_database.Initialize("Test_8"));  // Will initialise a new database by creating it.
+            Assert.IsTrue(SQLiteDatabase.Initialize("Test_0"));  // Will initialise the database created in the CTOR.
+            Assert.IsTrue(SQLiteDatabase.Initialize("Test_8"));  // Will initialise a new database by creating it.
         }
 
         [TestMethod]
@@ -197,8 +178,9 @@ namespace UnitTests
         {
             // SETUP
             Assert.IsTrue(SQLiteDatabase.Create("Test_9"));
+            var database10 = new SQLiteDatabase("Test_10");
+            Assert.IsNotNull(database10);
 
-            Assert.ThrowsException<ArgumentNullException>(() => SQLiteDatabase.Delete(null));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Delete(""));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Delete("    "));
 
@@ -208,7 +190,12 @@ namespace UnitTests
 
             Assert.IsFalse(SQLiteDatabase.Exists("Test_9"));
 
-            Assert.IsFalse(SQLiteDatabase.Exists("Test_10"));
+
+            Assert.IsTrue(SQLiteDatabase.Exists(database10));
+
+            Assert.IsTrue(SQLiteDatabase.Delete(database10));
+
+            Assert.IsFalse(SQLiteDatabase.Exists(database10));
         }
 
         [ClassCleanup]
