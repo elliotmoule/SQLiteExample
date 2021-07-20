@@ -13,7 +13,19 @@ namespace UnitTests
 
         public SQLiteDatabaseTests()
         {
+            ClearDBDirectory();
             _database = new SQLiteDatabase("Test_0");
+        }
+
+        private static void ClearDBDirectory()
+        {
+            var dirInfo = new DirectoryInfo(Path.Combine(SQLiteDatabase.DatabaseDirectory, SQLiteDatabase.AppName));
+
+            // Clear out directory of any or all pre-existing database files.
+            foreach (FileInfo file in dirInfo.GetFiles())
+            {
+                SQLiteDatabase.Delete(file.Name);
+            }
         }
 
         [TestMethod]
@@ -28,7 +40,7 @@ namespace UnitTests
             Assert.ThrowsException<ArgumentNullException>(() => SQLiteDatabase.GetDatabasePath(null));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath(""));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath("    "));
-            Assert.AreEqual(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Test_1.sqlite"), SQLiteDatabase.GetDatabasePath("Test_1"));
+            Assert.AreEqual(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SQLiteDatabase.AppName, "Test_1.db"), SQLiteDatabase.GetDatabasePath("Test_1"));
         }
 
         [TestMethod]
@@ -67,10 +79,12 @@ namespace UnitTests
 
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.ConnectToDatabase("ADatabaseThatDoesNotExist"));
 
-            var connection1 = SQLiteDatabase.ConnectToDatabase("Test_4");
-            Assert.IsNotNull(connection1);
-            Assert.AreEqual(System.Data.ConnectionState.Open, connection1.State);
-            Assert.AreEqual(SQLiteDatabase.GetConnectionString("Test_4"), connection1.ConnectionString);
+            using (var connection1 = SQLiteDatabase.ConnectToDatabase("Test_4"))
+            {
+                Assert.IsNotNull(connection1);
+                Assert.AreEqual(System.Data.ConnectionState.Open, connection1.State);
+                Assert.AreEqual(SQLiteDatabase.GetConnectionString("Test_4"), connection1.ConnectionString);
+            }
 
             var connection2 = SQLiteDatabase.ConnectToDatabase();       // Should connect to initialised DB (created in the CTOR).
             Assert.IsNotNull(connection2);
@@ -162,7 +176,6 @@ namespace UnitTests
             };
 
             Assert.ThrowsException<ArgumentNullException>(() => Utilities.ListContains(null, "Profile", "Image"));
-            Assert.ThrowsException<ArgumentNullException>(() => Utilities.ListContains(list, "", ""));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => Utilities.ListContains(new List<string>(), "Profile"));
 
             Assert.IsTrue(Utilities.ListContains(list, "Profile", "Image"));
@@ -202,6 +215,7 @@ namespace UnitTests
         public static void RemoveDatabaseInitialised()
         {
             Assert.IsTrue(SQLiteDatabase.Delete("Test_0"));
+            ClearDBDirectory();
         }
     }
 }

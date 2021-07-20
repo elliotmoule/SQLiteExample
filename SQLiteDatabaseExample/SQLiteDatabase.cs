@@ -77,7 +77,7 @@ namespace SQLiteDatabaseExample
             GC.WaitForPendingFinalizers();
 
             // Delete the database file.
-            File.Delete(databaseName);
+            File.Delete(GetDatabasePath(databaseName));
 
             return !Exists(databaseName);   // Checks whether the database still exists. If it does, this will return false.
         }
@@ -133,7 +133,7 @@ namespace SQLiteDatabaseExample
             {
                 // Read in schema for table creation.
                 var sql = File.ReadAllText("./TableSchema.sqlite");
-                using var connection = ConnectToDatabase();
+                using var connection = ConnectToDatabase(databaseName);
                 using var cmd = new SQLiteCommand(sql, connection);
                 cmd.ExecuteNonQuery();
             }
