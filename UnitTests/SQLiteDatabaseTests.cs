@@ -37,7 +37,7 @@ namespace UnitTests
         [TestMethod]
         public void GetDatabasePath()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => SQLiteDatabase.GetDatabasePath(null));
+            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath(null));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath(""));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath("    "));
             Assert.AreEqual(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SQLiteDatabase.AppName, "Test_1.db"), SQLiteDatabase.GetDatabasePath("Test_1"));
@@ -52,8 +52,8 @@ namespace UnitTests
             Assert.IsTrue(SQLiteDatabase.Exists("Test_2"));
 
             Assert.IsFalse(SQLiteDatabase.Exists("NotADatabaseToTest"));
-            Assert.IsFalse(SQLiteDatabase.Exists(""));
-            Assert.IsFalse(SQLiteDatabase.Exists("     "));
+            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Exists(""));
+            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Exists("     "));
 
             // TEAR DOWN
             Assert.IsTrue(SQLiteDatabase.Delete("Test_2"));
@@ -62,7 +62,7 @@ namespace UnitTests
         [TestMethod]
         public void GetConnectionString()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => SQLiteDatabase.GetConnectionString(null));
+            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetConnectionString(null));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetConnectionString(""));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetConnectionString("     "));
             var path = SQLiteDatabase.GetDatabasePath("Test_3");
@@ -118,7 +118,7 @@ namespace UnitTests
         [TestMethod]
         public void CreateDatabase()
         {
-            Assert.ThrowsException<ArgumentNullException>(() => SQLiteDatabase.Create(null));
+            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Create(null));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Create(""));
             Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Create("   "));
 

@@ -33,8 +33,7 @@ namespace SQLiteDatabaseExample
         /// <returns>Returns true if the database was successfully created.</returns>
         public static bool Create(string databaseName)
         {
-            if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
-            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided");
+            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
 
             if (Exists(databaseName))
                 return false;   // Database already exists.
@@ -56,8 +55,7 @@ namespace SQLiteDatabaseExample
         /// <returns>Returns true if the database was successfully deleted.</returns>
         public static bool Delete(string databaseName)
         {
-            if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
-            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided");
+            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
 
             // Check the database exists.
             if (!Exists(databaseName)) return false;
@@ -123,8 +121,7 @@ namespace SQLiteDatabaseExample
         /// <returns>Returns true if tables were successfully added.</returns>
         private static bool CreateTables(string databaseName)
         {
-            if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
-            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided");
+            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
 
             if (!Exists(databaseName)) return false;    // Database doesn't exist.
 
@@ -177,8 +174,7 @@ namespace SQLiteDatabaseExample
         /// <returns>Returns true if the database is found.</returns>
         public static bool Exists(string databaseName)
         {
-            if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided.");
-            if (string.IsNullOrWhiteSpace(databaseName)) return false;
+            if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
 
             return File.Exists(GetDatabasePath(databaseName));
         }
@@ -192,9 +188,13 @@ namespace SQLiteDatabaseExample
         /// <returns>Returns a path string of where the database should be located, regardless of whether the database exists.</returns>
         public static string GetDatabasePath(string databaseName)
         {
-            if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided.");
             if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
             return Path.Combine(DatabaseDirectory, AppName, Path.ChangeExtension(databaseName, "db"));
+        }
+
+        public string GetDatabasePath()
+        {
+            return GetDatabasePath(DatabaseName);
         }
 
         /// <summary>
@@ -204,7 +204,6 @@ namespace SQLiteDatabaseExample
         /// <returns>Returns a connection string for any database. This does not ensure that the given database actually exists.</returns>
         public static string GetConnectionString(string databaseName)
         {
-            if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided.");
             if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
             return $"Data Source={GetDatabasePath(databaseName)};Version=3";
         }

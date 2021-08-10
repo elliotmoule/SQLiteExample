@@ -28,11 +28,13 @@ namespace SQLiteDatabaseExample
                         Console.WriteLine($"Successfully deleted Database: {database}.");
                     else
                         Console.WriteLine($"Failed to delete Database: {database}.");
-
                     break;
                 }
                 else if (key.Key == ConsoleKey.N)
+                {
+                    Console.WriteLine($"Database located at: {database.GetDatabasePath()}");
                     break;
+                }
                 else
                     Console.WriteLine("Invalid input. Please enter either Y or N.");
             }
