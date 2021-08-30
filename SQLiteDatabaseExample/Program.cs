@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SQLite.Library;
+using System;
 
 namespace SQLiteDatabaseExample
 {
@@ -15,7 +16,7 @@ namespace SQLiteDatabaseExample
             ExitOperation(database);
         }
 
-        private static void ExitOperation(SQLiteDatabase database)
+        private static void ExitOperation(Database database)
         {
             while (true)
             {
@@ -24,7 +25,7 @@ namespace SQLiteDatabaseExample
 
                 if (key.Key == ConsoleKey.Y)
                 {
-                    if (SQLiteDatabase.Delete(database))
+                    if (Database.Delete(database))
                         Console.WriteLine($"Successfully deleted Database: {database}.");
                     else
                         Console.WriteLine($"Failed to delete Database: {database}.");
@@ -43,7 +44,7 @@ namespace SQLiteDatabaseExample
 
         private static void CreateTables(string databaseName)
         {
-            var tables = SQLiteDatabase.GetExistingTables(databaseName);
+            var tables = Database.GetExistingTables(databaseName);
             Console.WriteLine($"{databaseName} has {tables.Count} tables{(tables.Count > 0 ? ":" : string.Empty)}");
 
             if (tables.Count > 0)
@@ -51,11 +52,11 @@ namespace SQLiteDatabaseExample
                     Console.WriteLine($"  - {table}");
         }
 
-        private static SQLiteDatabase CreateDatabase(string databaseName)
+        private static Database CreateDatabase(string databaseName)
         {
-            var database = new SQLiteDatabase(databaseName);
+            var database = new Database(databaseName);
 
-            if (SQLiteDatabase.Exists(database))
+            if (Database.Exists(database))
                 Console.WriteLine($"Created Database: {database}.");
             else
                 Console.WriteLine($"Failed to create Database: {database}.");

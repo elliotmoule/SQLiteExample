@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Data.SQLite;
 using System.IO;
 
-namespace SQLiteDatabaseExample
+namespace SQLite.Library
 {
-    public class SQLiteDatabase
+    public class Database
     {
         /// <summary>
         /// The name of the database. This will be set when the <see cref="SQLiteDatabase"/> class is initialized.
@@ -19,7 +19,7 @@ namespace SQLiteDatabaseExample
 
         public static string AppName { get; } = "SQLiteDatabaseExample";
 
-        public SQLiteDatabase(string databaseName)
+        public Database(string databaseName)
         {
             if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
             DatabaseName = databaseName;
@@ -80,7 +80,7 @@ namespace SQLiteDatabaseExample
             return !Exists(databaseName);   // Checks whether the database still exists. If it does, this will return false.
         }
 
-        public static bool Delete(SQLiteDatabase database) => Delete(database.ToString());
+        public static bool Delete(Database database) => Delete(database.ToString());
 
         public static bool Initialize(string databaseName)
         {
@@ -132,9 +132,11 @@ namespace SQLiteDatabaseExample
             {
                 // Read in schema for table creation.
                 var sql = File.ReadAllText("./TableSchema.sqlite");
-                using var connection = ConnectToDatabase(databaseName);
-                using var cmd = new SQLiteCommand(sql, connection);
-                cmd.ExecuteNonQuery();
+                using (var connection = ConnectToDatabase(databaseName))
+                using (var cmd = new SQLiteCommand(sql, connection))
+                {
+                    cmd.ExecuteNonQuery();
+                }   
             }
             catch (Exception ex)
             {
@@ -179,7 +181,7 @@ namespace SQLiteDatabaseExample
             return File.Exists(GetDatabasePath(databaseName));
         }
 
-        public static bool Exists(SQLiteDatabase database) => Exists(database.ToString());
+        public static bool Exists(Database database) => Exists(database.ToString());
 
         /// <summary>
         /// Provides the file path for where a database should be stored.

@@ -1,96 +1,96 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using SQLiteDatabaseExample;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using SQLite.Library;
 
 namespace UnitTests
 {
     [TestClass]
-    public class SQLiteDatabaseTests
+    public class DatabaseTests
     {
-        private readonly SQLiteDatabase _database;
+        private readonly Database _database;
 
-        public SQLiteDatabaseTests()
+        public DatabaseTests()
         {
             ClearDBDirectory();
-            _database = new SQLiteDatabase("Test_0");
+            _database = new Database("Test_0");
         }
 
         private static void ClearDBDirectory()
         {
-            var dirInfo = new DirectoryInfo(Path.Combine(SQLiteDatabase.DatabaseDirectory, SQLiteDatabase.AppName));
+            var dirInfo = new DirectoryInfo(Path.Combine(Database.DatabaseDirectory, Database.AppName));
 
             // Clear out directory of any or all pre-existing database files.
             foreach (FileInfo file in dirInfo.GetFiles())
             {
-                SQLiteDatabase.Delete(file.Name);
+                Database.Delete(file.Name);
             }
         }
 
         [TestMethod]
         public void CheckDatabaseNameAfterInit()
         {
-            Assert.AreEqual("Test_0", SQLiteDatabase.DatabaseName);
+            Assert.AreEqual("Test_0", Database.DatabaseName);
         }
 
         [TestMethod]
         public void GetDatabasePath()
         {
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath(null));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath(""));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetDatabasePath("    "));
-            Assert.AreEqual(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), SQLiteDatabase.AppName, "Test_1.db"), SQLiteDatabase.GetDatabasePath("Test_1"));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetDatabasePath(null));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetDatabasePath(""));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetDatabasePath("    "));
+            Assert.AreEqual(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), Database.AppName, "Test_1.db"), Database.GetDatabasePath("Test_1"));
         }
 
         [TestMethod]
         public void Exists()
         {
             // SETUP
-            Assert.IsTrue(SQLiteDatabase.Create("Test_2"));
+            Assert.IsTrue(Database.Create("Test_2"));
 
-            Assert.IsTrue(SQLiteDatabase.Exists("Test_2"));
+            Assert.IsTrue(Database.Exists("Test_2"));
 
-            Assert.IsFalse(SQLiteDatabase.Exists("NotADatabaseToTest"));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Exists(""));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Exists("     "));
+            Assert.IsFalse(Database.Exists("NotADatabaseToTest"));
+            Assert.ThrowsException<ArgumentException>(() => Database.Exists(""));
+            Assert.ThrowsException<ArgumentException>(() => Database.Exists("     "));
 
             // TEAR DOWN
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_2"));
+            Assert.IsTrue(Database.Delete("Test_2"));
         }
 
         [TestMethod]
         public void GetConnectionString()
         {
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetConnectionString(null));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetConnectionString(""));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetConnectionString("     "));
-            var path = SQLiteDatabase.GetDatabasePath("Test_3");
-            Assert.AreEqual($"Data Source={path};Version=3", SQLiteDatabase.GetConnectionString("Test_3"));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetConnectionString(null));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetConnectionString(""));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetConnectionString("     "));
+            var path = Database.GetDatabasePath("Test_3");
+            Assert.AreEqual($"Data Source={path};Version=3", Database.GetConnectionString("Test_3"));
         }
 
         [TestMethod]
         public void ConnectToDatabase()
         {
             // SETUP
-            Assert.IsTrue(SQLiteDatabase.Create("Test_4"));
+            Assert.IsTrue(Database.Create("Test_4"));
 
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.ConnectToDatabase("ADatabaseThatDoesNotExist"));
+            Assert.ThrowsException<ArgumentException>(() => Database.ConnectToDatabase("ADatabaseThatDoesNotExist"));
 
-            using (var connection1 = SQLiteDatabase.ConnectToDatabase("Test_4"))
+            using (var connection1 = Database.ConnectToDatabase("Test_4"))
             {
                 Assert.IsNotNull(connection1);
                 Assert.AreEqual(System.Data.ConnectionState.Open, connection1.State);
-                Assert.AreEqual(SQLiteDatabase.GetConnectionString("Test_4"), connection1.ConnectionString);
+                Assert.AreEqual(Database.GetConnectionString("Test_4"), connection1.ConnectionString);
             }
 
-            var connection2 = SQLiteDatabase.ConnectToDatabase();       // Should connect to initialised DB (created in the CTOR).
+            var connection2 = Database.ConnectToDatabase();       // Should connect to initialised DB (created in the CTOR).
             Assert.IsNotNull(connection2);
             Assert.AreEqual(System.Data.ConnectionState.Open, connection2.State);
-            Assert.AreEqual(SQLiteDatabase.GetConnectionString("Test_0"), connection2.ConnectionString);
+            Assert.AreEqual(Database.GetConnectionString("Test_0"), connection2.ConnectionString);
 
             // TEAR DOWN
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_4"));
+            Assert.IsTrue(Database.Delete("Test_4"));
         }
 
         /// <summary>
@@ -100,32 +100,32 @@ namespace UnitTests
         public void GetExistingTables()
         {
             // SETUP
-            var testDb5 = new SQLiteDatabase("Test_5");
+            var testDb5 = new Database("Test_5");
             Assert.IsNotNull(testDb5);
 
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.GetExistingTables("ADatabaseThatDoesNotExist"));
+            Assert.ThrowsException<ArgumentException>(() => Database.GetExistingTables("ADatabaseThatDoesNotExist"));
 
-            var tables = SQLiteDatabase.GetExistingTables("Test_5");
+            var tables = Database.GetExistingTables("Test_5");
             Assert.IsNotNull(tables);
             Assert.AreEqual(2, tables.Count);
             Assert.IsTrue(tables.Contains("Profile"));
             Assert.IsTrue(tables.Contains("Image"));
 
             // TEAR DOWN
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_5"));
+            Assert.IsTrue(Database.Delete("Test_5"));
         }
 
         [TestMethod]
         public void CreateDatabase()
         {
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Create(null));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Create(""));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Create("   "));
+            Assert.ThrowsException<ArgumentException>(() => Database.Create(null));
+            Assert.ThrowsException<ArgumentException>(() => Database.Create(""));
+            Assert.ThrowsException<ArgumentException>(() => Database.Create("   "));
 
-            Assert.IsTrue(SQLiteDatabase.Create("Test_6"));
-            Assert.IsFalse(SQLiteDatabase.Create("Test_6"));    // Shouldn't be able to create an existing database.
+            Assert.IsTrue(Database.Create("Test_6"));
+            Assert.IsFalse(Database.Create("Test_6"));    // Shouldn't be able to create an existing database.
 
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_6"));
+            Assert.IsTrue(Database.Delete("Test_6"));
         }
 
         [TestMethod]
@@ -169,39 +169,39 @@ namespace UnitTests
         [TestMethod]
         public void InitialiseDatabase()
         {
-            Assert.IsTrue(SQLiteDatabase.Initialize("Test_0"));  // Will initialise the database created in the CTOR.
-            Assert.IsTrue(SQLiteDatabase.Initialize("Test_8"));  // Will initialise a new database by creating it.
+            Assert.IsTrue(Database.Initialize("Test_0"));  // Will initialise the database created in the CTOR.
+            Assert.IsTrue(Database.Initialize("Test_8"));  // Will initialise a new database by creating it.
         }
 
         [TestMethod]
         public void DeleteDatabase()
         {
             // SETUP
-            Assert.IsTrue(SQLiteDatabase.Create("Test_9"));
-            var database10 = new SQLiteDatabase("Test_10");
+            Assert.IsTrue(Database.Create("Test_9"));
+            var database10 = new Database("Test_10");
             Assert.IsNotNull(database10);
 
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Delete(""));
-            Assert.ThrowsException<ArgumentException>(() => SQLiteDatabase.Delete("    "));
+            Assert.ThrowsException<ArgumentException>(() => Database.Delete(""));
+            Assert.ThrowsException<ArgumentException>(() => Database.Delete("    "));
 
-            Assert.IsTrue(SQLiteDatabase.Exists("Test_9"));
+            Assert.IsTrue(Database.Exists("Test_9"));
 
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_9"));
+            Assert.IsTrue(Database.Delete("Test_9"));
 
-            Assert.IsFalse(SQLiteDatabase.Exists("Test_9"));
+            Assert.IsFalse(Database.Exists("Test_9"));
 
 
-            Assert.IsTrue(SQLiteDatabase.Exists(database10));
+            Assert.IsTrue(Database.Exists(database10));
 
-            Assert.IsTrue(SQLiteDatabase.Delete(database10));
+            Assert.IsTrue(Database.Delete(database10));
 
-            Assert.IsFalse(SQLiteDatabase.Exists(database10));
+            Assert.IsFalse(Database.Exists(database10));
         }
 
         [ClassCleanup]
         public static void RemoveDatabaseInitialised()
         {
-            Assert.IsTrue(SQLiteDatabase.Delete("Test_0"));
+            Assert.IsTrue(Database.Delete("Test_0"));
             ClearDBDirectory();
         }
     }

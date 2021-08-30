@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace SQLiteDatabaseExample
+namespace SQLite.Library
 {
     public static class Utilities
     {
