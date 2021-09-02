@@ -14,7 +14,7 @@ namespace UnitTests
         public DatabaseTests()
         {
             ClearDBDirectory();
-            _database = new Database("Test_0");
+            _database = new Database("Test_0", "./TableSchema.sqlite");
         }
 
         private static void ClearDBDirectory()
@@ -100,7 +100,7 @@ namespace UnitTests
         public void GetExistingTables()
         {
             // SETUP
-            var testDb5 = new Database("Test_5");
+            var testDb5 = new Database("Test_5", "./TableSchema.sqlite");
             Assert.IsNotNull(testDb5);
 
             Assert.ThrowsException<ArgumentException>(() => Database.GetExistingTables("ADatabaseThatDoesNotExist"));
@@ -178,7 +178,7 @@ namespace UnitTests
         {
             // SETUP
             Assert.IsTrue(Database.Create("Test_9"));
-            var database10 = new Database("Test_10");
+            var database10 = new Database("Test_10", "./TableSchema.sqlite");
             Assert.IsNotNull(database10);
 
             Assert.ThrowsException<ArgumentException>(() => Database.Delete(""));

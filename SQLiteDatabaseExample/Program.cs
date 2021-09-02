@@ -54,7 +54,7 @@ namespace SQLiteDatabaseExample
 
         private static Database CreateDatabase(string databaseName)
         {
-            var database = new Database(databaseName);
+            var database = new Database(databaseName, "./TableSchema.sqlite");
 
             if (Database.Exists(database))
                 Console.WriteLine($"Created Database: {database}.");

@@ -19,9 +19,13 @@ namespace SQLite.Library
 
         public static string AppName { get; } = "SQLiteDatabaseExample";
 
-        public Database(string databaseName)
+        public static string TableSchemaFile { get; private set; } = "./TableSchema.sqlite";
+
+        public Database(string databaseName, string tableSchemaFile)
         {
             if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
+            if (string.IsNullOrWhiteSpace(tableSchemaFile) || !File.Exists(tableSchemaFile)) throw new ArgumentException("A valid table schema file must be provided.");
+            TableSchemaFile = tableSchemaFile;
             DatabaseName = databaseName;
             Initialize(databaseName);
         }
@@ -92,12 +96,8 @@ namespace SQLite.Library
                 // Fetch all tables in DB.
                 var tables = GetExistingTables(databaseName);
 
-                // Check whether any expected tables are missing.
-                if (!Utilities.ListContains(tables, "Profile", "Image"))
-                {
-                    // Tables are missing.
-                    return false;
-                }
+                // Check whether tables exist.
+                return tables.Count != 0;
             }
             else
             {
@@ -125,13 +125,15 @@ namespace SQLite.Library
 
             if (!Exists(databaseName)) return false;    // Database doesn't exist.
 
+            if (!File.Exists(TableSchemaFile)) return false;    // Table schema file doesn't exist.
+
             // Retrieve current tables, so that we know what is already there.
             var currentTables = GetExistingTables(databaseName);
 
             try
             {
                 // Read in schema for table creation.
-                var sql = File.ReadAllText("./TableSchema.sqlite");
+                var sql = File.ReadAllText(TableSchemaFile);
                 using (var connection = ConnectToDatabase(databaseName))
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
