@@ -17,17 +17,18 @@ namespace SQLite.Library
         /// </summary>
         public static string DatabaseDirectory { get; } = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-        public static string AppName { get; } = "SQLiteDatabaseExample";
+        public static string AppName { get; private set; } = "SQLiteDatabaseExample";
 
         public static string TableSchemaFile { get; private set; } = "./TableSchema.sqlite";
 
-        public Database(string databaseName, string tableSchemaFile)
+        public Database(string databaseName, string tableSchemaFile, string appName = "")
         {
             if (null == databaseName) throw new ArgumentNullException("A database name needs to be provided");
             if (string.IsNullOrWhiteSpace(tableSchemaFile) || !File.Exists(tableSchemaFile)) throw new ArgumentException("A valid table schema file must be provided.");
+            if (!string.IsNullOrWhiteSpace(appName)) AppName = appName;
             TableSchemaFile = tableSchemaFile;
-            DatabaseName = databaseName;
-            Initialize(databaseName);
+            DatabaseName = databaseName.RemoveSpaces();
+            Initialize(DatabaseName);
         }
 
         /// <summary>
@@ -138,7 +139,7 @@ namespace SQLite.Library
                 using (var cmd = new SQLiteCommand(sql, connection))
                 {
                     cmd.ExecuteNonQuery();
-                }   
+                }
             }
             catch (Exception ex)
             {
@@ -180,7 +181,8 @@ namespace SQLite.Library
         {
             if (string.IsNullOrWhiteSpace(databaseName)) throw new ArgumentException("A database name needs to be provided.");
 
-            return File.Exists(GetDatabasePath(databaseName));
+            var fullPath = GetDatabasePath(databaseName);
+            return File.Exists(fullPath);
         }
 
         public static bool Exists(Database database) => Exists(database.ToString());

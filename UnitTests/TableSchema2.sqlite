@@ -1,0 +1,15 @@
+﻿CREATE TABLE [Job](
+	[ID] INTEGER PRIMARY KEY AUTOINCREMENT,
+	[Code] TEXT NOT NULL,
+	[FirstName] TEXT NOT NULL,
+	[LastName] TEXT NOT NULL,
+	[Issue] TEXT NOT NULL,
+	[Location] TEXT NULL,
+	[Phone] TEXT NULL,
+	[Email] TEXT NULL,
+	[DateCreated] TEXT NOT NULL,
+	[DateModified] TEXT NOT NULL);
+
+CREATE TABLE [Database](
+	[Version] INTEGER NOT NULL,
+	[Created] TEXT NOT NULL);

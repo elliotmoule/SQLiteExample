@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SQLite;
+using System.Data.SqlTypes;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace SQLite.Library
 {
@@ -38,6 +42,123 @@ namespace SQLite.Library
             if (list.Count < 1) throw new ArgumentOutOfRangeException("Provided list was empty.");
 
             return list.Any(x => x.Equals(input, StringComparison.OrdinalIgnoreCase));
+        }
+
+        /// <summary>
+        /// Auto populates an SQLParameter object with value, type, and provides a unqiue name.
+        /// <para>Will throw an exception if the provided object type isn't covered by this extension.</para>
+        /// <para>Does not support nullable types.</para>
+        /// </summary>
+        /// <typeparam name="T">The type of object.</typeparam>
+        /// <param name="o">The object to use for the parameter.</param>
+        /// <param name="name">Optional override for name.</param>
+        /// <returns>Returns an SqlParameter that can be used within a query.</returns>
+        public static SQLiteParameter ToSqliteParameter<T>(this T o, string paramName = "")
+        {
+            if (o == null)
+            {
+                return null;
+            }
+            var type = typeof(T);
+            if (Nullable.GetUnderlyingType(type) != null) return null;  // nullable type
+
+            SQLiteParameter sql;
+
+            var name = paramName;
+            if (string.IsNullOrWhiteSpace(paramName))
+            {
+                var id = Guid.NewGuid().ToString();
+                name = $"{typeof(T).Name}{id.Substring(id.Length - 4, 4)}";
+            }
+
+            if (name[0] != '@')
+            {
+                name = $"@{name}";
+            }
+
+            if (o is int num)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = num,
+                    DbType = DbType.Int32
+                };
+            }
+            else if (o is string str)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = str.Trim(),
+                    DbType = DbType.String
+                };
+            }
+            else if (o is bool b)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = b,
+                    DbType = DbType.Boolean
+                };
+            }
+            else if (o is DateTime dt)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = dt.ToString(),
+                    DbType = DbType.String
+                };
+            }
+            else if (o is decimal d)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = d,
+                    DbType = DbType.Decimal
+                };
+            }
+            else if (o is float f)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = f,
+                    DbType = DbType.Double
+                };
+            }
+            else if (o is double dd)
+            {
+                sql = new SQLiteParameter
+                {
+                    Value = dd,
+                    DbType = DbType.Double
+                };
+            }
+            else
+            {
+                // Add more statements as needed, to cover further types.
+                throw new Exception("Unsupported Type.");
+            }
+
+            sql.ParameterName = name;
+            return sql;
+        }
+
+        public static DateTime GetStringDateTime(this SQLiteDataReader reader, int index)
+        {
+            if (reader == null || index < 0) return (DateTime)SqlDateTime.MinValue;
+
+            if (!reader.IsDBNull(index) && DateTime.TryParse(reader.GetString(index), out DateTime result))
+            {
+                return result;
+            }
+
+            return (DateTime)SqlDateTime.MinValue;
+        }
+
+        private static readonly Regex WhiteSpace = new Regex(@"\s+");
+
+        public static string RemoveSpaces(this string input)
+        {
+            return string.IsNullOrWhiteSpace(input) ? string.Empty : WhiteSpace.Replace(input.Trim(), string.Empty);
         }
     }
 }
